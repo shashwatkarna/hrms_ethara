@@ -14,6 +14,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ExportButton } from "@/components/export-button";
 import { cn } from '@/lib/utils'
 
 interface Employee {
@@ -34,12 +36,12 @@ interface AttendanceClientProps {
     date: string
 }
 
-export function AttendanceClient({ employees, attendance, date }: AttendanceClientProps) {
+export function AttendanceClient({ employees, attendance: initialData, date }: AttendanceClientProps) {
     const router = useRouter()
     const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
 
     // attendanceMap for quick lookup
-    const attendanceMap = new Map(attendance.map(r => [r.employee_id, r.status]))
+    const attendanceMap = new Map(initialData.map((r: AttendanceRecord) => [r.employee_id, r.status]))
 
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         router.push(`/attendance?date=${e.target.value}`)
@@ -67,18 +69,37 @@ export function AttendanceClient({ employees, attendance, date }: AttendanceClie
 
     return (
         <div>
-            <div className="flex items-center gap-4 mb-6 bg-card p-4 rounded-lg border shadow-sm w-fit">
-                <span className="font-medium">Select Date:</span>
-                <Input
-                    type="date"
-                    value={date}
-                    onChange={handleDateChange}
-                    className="w-auto"
-                />
-                <span className="text-muted-foreground text-sm ml-2">
-                    {format(new Date(date), 'EEEE, MMMM do, yyyy')}
-                </span>
-            </div>
+            <Card className="mb-6">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-xl font-bold">Attendance Management</CardTitle>
+                    <ExportButton
+                        data={initialData.map((r: AttendanceRecord) => {
+                            const emp = employees.find(e => e.id === r.employee_id)
+                            return {
+                                Date: r.date,
+                                Name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
+                                Department: emp?.department || 'N/A',
+                                Status: r.status
+                            }
+                        })}
+                        filename={`attendance_${date}.csv`}
+                    />
+                </CardHeader>
+                <CardContent>
+                    <div className="flex items-center gap-4 mb-6 bg-card p-4 rounded-lg border shadow-sm w-fit">
+                        <span className="font-medium">Select Date:</span>
+                        <Input
+                            type="date"
+                            value={date}
+                            onChange={handleDateChange}
+                            className="w-auto"
+                        />
+                        <span className="text-muted-foreground text-sm ml-2">
+                            {format(new Date(date), 'EEEE, MMMM do, yyyy')}
+                        </span>
+                    </div>
+                </CardContent>
+            </Card>
 
             <div className="border rounded-md bg-background">
                 <Table>
