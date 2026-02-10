@@ -15,7 +15,7 @@ export function Navbar() {
                     <Link href="/attendance" className="text-sm font-medium hover:underline underline-offset-4">
                         Attendance
                     </Link>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="hover:bg-background cursor-default hover:text-foreground">
                         Admin
                     </Button>
                 </div>

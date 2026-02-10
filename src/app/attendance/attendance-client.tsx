@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import { format, addDays, subDays } from 'date-fns'
 import { Check, X, Loader2, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ interface Employee {
 interface AttendanceRecord {
     employee_id: string
     status: 'Present' | 'Absent'
+    date: string // Ensure date is part of the record for history export
 }
 
 interface AttendanceClientProps {
@@ -85,23 +87,53 @@ export function AttendanceClient({ employees, attendance: initialData, date }: A
         }
     }
 
+    const fetchAllAttendance = async () => {
+        const { data, error } = await supabase
+            .from('attendance')
+            .select('*')
+            .order('date', { ascending: false })
+
+        if (error) {
+            console.error('Error fetching attendance history:', error)
+            throw error
+        }
+
+        return (data || []).map((r: any) => {
+            const emp = employees.find(e => e.id === r.employee_id)
+            return {
+                Date: r.date,
+                Name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
+                Department: emp?.department || 'N/A',
+                Status: r.status
+            }
+        })
+    }
+
     return (
         <div>
             <Card className="mb-6">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-xl font-bold">Attendance Management</CardTitle>
-                    <ExportButton
-                        data={initialData.map((r: AttendanceRecord) => {
-                            const emp = employees.find(e => e.id === r.employee_id)
-                            return {
-                                Date: date,
-                                Name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
-                                Department: emp?.department || 'N/A',
-                                Status: r.status
-                            }
-                        })}
-                        filename={`attendance_${date}.csv`}
-                    />
+                    <div className="flex gap-2">
+                        <ExportButton
+                            data={initialData.map((r: AttendanceRecord) => {
+                                const emp = employees.find(e => e.id === r.employee_id)
+                                return {
+                                    Date: date,
+                                    Name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
+                                    Department: emp?.department || 'N/A',
+                                    Status: r.status
+                                }
+                            })}
+                            filename={`attendance_${date}.csv`}
+                            label="Export today's data"
+                        />
+                        <ExportButton
+                            fetchData={fetchAllAttendance}
+                            filename={`attendance_history_${format(new Date(), 'yyyy-MM-dd')}.csv`}
+                            label="Export All Attendance Data"
+                        />
+                    </div>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
