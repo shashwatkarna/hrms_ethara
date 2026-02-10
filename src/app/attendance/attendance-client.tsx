@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { format } from 'date-fns'
-import { Check, X, Loader2 } from 'lucide-react'
+import { format, addDays, subDays } from 'date-fns'
+import { Check, X, Loader2, ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -43,8 +43,26 @@ export function AttendanceClient({ employees, attendance: initialData, date }: A
     // attendanceMap for quick lookup
     const attendanceMap = new Map(initialData.map((r: AttendanceRecord) => [r.employee_id, r.status]))
 
+    const updateDate = (newDate: string) => {
+        router.push(`/attendance?date=${newDate}`)
+    }
+
     const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        router.push(`/attendance?date=${e.target.value}`)
+        updateDate(e.target.value)
+    }
+
+    const handlePrevDay = () => {
+        const prevDate = subDays(new Date(date), 1)
+        updateDate(format(prevDate, 'yyyy-MM-dd'))
+    }
+
+    const handleNextDay = () => {
+        const nextDate = addDays(new Date(date), 1)
+        updateDate(format(nextDate, 'yyyy-MM-dd'))
+    }
+
+    const handleToday = () => {
+        updateDate(format(new Date(), 'yyyy-MM-dd'))
     }
 
     const markAttendance = async (employeeId: string, status: 'Present' | 'Absent') => {
@@ -86,17 +104,50 @@ export function AttendanceClient({ employees, attendance: initialData, date }: A
                     />
                 </CardHeader>
                 <CardContent>
-                    <div className="flex items-center gap-4 mb-6 bg-card p-4 rounded-lg border shadow-sm w-fit">
-                        <span className="font-medium">Select Date:</span>
-                        <Input
-                            type="date"
-                            value={date}
-                            onChange={handleDateChange}
-                            className="w-auto"
-                        />
-                        <span className="text-muted-foreground text-sm ml-2">
-                            {format(new Date(date), 'EEEE, MMMM do, yyyy')}
-                        </span>
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 bg-card p-2 rounded-lg border shadow-sm">
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handlePrevDay}
+                                title="Previous Day"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+
+                            <div className="relative">
+                                <Input
+                                    type="date"
+                                    value={date}
+                                    onChange={handleDateChange}
+                                    className="w-[150px] border-none shadow-none focus-visible:ring-0 px-2 text-center font-medium"
+                                />
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={handleNextDay}
+                                title="Next Day"
+                            >
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg font-semibold text-foreground/80 hidden sm:inline-block">
+                                {format(new Date(date), 'EEEE, MMMM do, yyyy')}
+                            </span>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleToday}
+                                className="ml-2"
+                            >
+                                <CalendarIcon className="mr-2 h-4 w-4" />
+                                Today
+                            </Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
