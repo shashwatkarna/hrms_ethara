@@ -1,45 +1,62 @@
 # HRMS Lite
 
-A lightweight Human Resource Management System built with Next.js, Tailwind CSS, and Supabase.
+A lightweight, modern Human Resource Management System built with **Next.js 14**, **Tailwind CSS**, and **Supabase**. designed for efficiency and ease of use.
 
 ## Features
 
-- **Employee Management**: Add, view, and delete employee records.
-- **Attendance Management**: Mark daily attendance (Present/Absent) and view history.
-- **Dashboard**: Quick overview of workforce stats.
+-   **Employee Management**:
+    -   Add, view, and delete employee records.
+    -   Track department and contact information.
+-   **Attendance Management**:
+    -   **Smart Navigation**: Easily switch between days with "Previous", "Next", and "Today" buttons.
+    -   **Daily Marking**: Mark employees as 'Present' or 'Absent' instantly.
+    -   **Visual Status**: Clear color-coded badges for attendance status.
+-   **Data Export**:
+    -   **Export Today's Data**: Download attendance records for the currently selected date.
+    -   **Export All Attendance Data**: Download the complete attendance history in CSV format.
+-   **Dashboard**:
+    -   Quick overview of total employees and attendance stats.
+-   **Modern UI/UX**:
+    -   Clean, responsive design with hover effects and smooth transitions.
+    -   Built with semantic HTML and accessible components.
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14 (App Router), React, Tailwind CSS, Lucide Icons.
-- **Backend**: Next.js API Routes.
-- **Database**: Supabase (PostgreSQL).
-- **UI Components**: Custom components inspired by shadcn/ui.
+-   **Framework**: Next.js 14, React, Tailwind CSS, Lucide Icons.
+-   **Database**: Supabase (PostgreSQL).
+-   **Utilities**: `date-fns` for date manipulation, `clsx` & `tailwind-merge` for styling.
 
 ## Setup Instructions
 
 ### Prerequisites
-- Node.js installed.
-- A Supabase account and project.
+
+-   Node.js (v18+ recommended)
+-   A Supabase account and project.
 
 ### 1. Clone the repository
+
 ```bash
 git clone <repository-url>
 cd ethara_hrms
 ```
 
 ### 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Configure Environment Variables
+
 Create a `.env.local` file in the root directory:
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### 4. Setup Database
+
 Run the following SQL in your Supabase SQL Editor to create the necessary tables:
 
 ```sql
@@ -65,17 +82,17 @@ CREATE TABLE attendance (
 ```
 
 ### 5. Run Locally
+
 ```bash
 npm run dev
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Deployment
 
-### Frontend (Vercel/Netlify)
-1. Import the repository.
-2. Add the Environment Variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in the deployment settings.
-3. Deploy.
+The application handles both frontend and backend logic (via Server Actions/API Routes).
 
-### Backend
-The backend is integral to the Next.js app and will be deployed automatically with the frontend.
+1.  Import the repository to **Vercel** or **Netlify**.
+2.  Add the Environment Variables (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) in the project settings.
+3.  Deploy.
