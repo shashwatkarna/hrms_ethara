@@ -76,7 +76,7 @@ export function AttendanceClient({ employees, attendance: initialData, date }: A
                         data={initialData.map((r: AttendanceRecord) => {
                             const emp = employees.find(e => e.id === r.employee_id)
                             return {
-                                Date: r.date,
+                                Date: date,
                                 Name: emp ? `${emp.first_name} ${emp.last_name}` : 'Unknown',
                                 Department: emp?.department || 'N/A',
                                 Status: r.status
