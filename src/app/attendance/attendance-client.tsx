@@ -1,0 +1,155 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { format } from 'date-fns'
+import { Check, X, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
+import { cn } from '@/lib/utils'
+
+interface Employee {
+    id: string
+    first_name: string
+    last_name: string
+    department: string
+}
+
+interface AttendanceRecord {
+    employee_id: string
+    status: 'Present' | 'Absent'
+}
+
+interface AttendanceClientProps {
+    employees: Employee[]
+    attendance: AttendanceRecord[]
+    date: string
+}
+
+export function AttendanceClient({ employees, attendance, date }: AttendanceClientProps) {
+    const router = useRouter()
+    const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({})
+
+    // attendanceMap for quick lookup
+    const attendanceMap = new Map(attendance.map(r => [r.employee_id, r.status]))
+
+    const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        router.push(`/attendance?date=${e.target.value}`)
+    }
+
+    const markAttendance = async (employeeId: string, status: 'Present' | 'Absent') => {
+        setLoadingMap(prev => ({ ...prev, [employeeId]: true }))
+        try {
+            const res = await fetch('/api/attendance', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employee_id: employeeId, date, status }),
+            })
+
+            if (!res.ok) throw new Error('Failed to mark attendance')
+
+            router.refresh()
+        } catch (err) {
+            console.error(err)
+            alert('Failed to update status')
+        } finally {
+            setLoadingMap(prev => ({ ...prev, [employeeId]: false }))
+        }
+    }
+
+    return (
+        <div>
+            <div className="flex items-center gap-4 mb-6 bg-card p-4 rounded-lg border shadow-sm w-fit">
+                <span className="font-medium">Select Date:</span>
+                <Input
+                    type="date"
+                    value={date}
+                    onChange={handleDateChange}
+                    className="w-auto"
+                />
+                <span className="text-muted-foreground text-sm ml-2">
+                    {format(new Date(date), 'EEEE, MMMM do, yyyy')}
+                </span>
+            </div>
+
+            <div className="border rounded-md bg-background">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Employee</TableHead>
+                            <TableHead>Department</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {employees.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-24">No employees found.</TableCell>
+                            </TableRow>
+                        ) : (
+                            employees.map((emp) => {
+                                const status = attendanceMap.get(emp.id)
+                                const isLoading = loadingMap[emp.id]
+
+                                return (
+                                    <TableRow key={emp.id}>
+                                        <TableCell className="font-medium">{emp.first_name} {emp.last_name}</TableCell>
+                                        <TableCell>{emp.department}</TableCell>
+                                        <TableCell>
+                                            {status === 'Present' && (
+                                                <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                                                    Present
+                                                </span>
+                                            )}
+                                            {status === 'Absent' && (
+                                                <span className="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                                                    Absent
+                                                </span>
+                                            )}
+                                            {!status && (
+                                                <span className="text-muted-foreground text-sm italic">Not Marked</span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    variant={status === 'Present' ? "default" : "outline"}
+                                                    className={cn(status === 'Present' && "bg-green-600 hover:bg-green-700")}
+                                                    onClick={() => markAttendance(emp.id, 'Present')}
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
+                                                    Present
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant={status === 'Absent' ? "default" : "outline"}
+                                                    className={cn(status === 'Absent' && "bg-red-600 hover:bg-red-700")}
+                                                    onClick={() => markAttendance(emp.id, 'Absent')}
+                                                    disabled={isLoading}
+                                                >
+                                                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4 mr-1" />}
+                                                    Absent
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    )
+}
