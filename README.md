@@ -36,7 +36,7 @@ A lightweight, modern Human Resource Management System built with **Next.js 14**
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/shashwatkarna/hrms_ethara.git
 cd ethara_hrms
 ```
 
