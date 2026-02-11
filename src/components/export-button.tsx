@@ -4,14 +4,17 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Download, Loader2 } from "lucide-react"
 
+import { cn } from "@/lib/utils"
+
 interface ExportButtonProps {
     data?: any[]
     fetchData?: () => Promise<any[]>
     filename?: string
     label?: string
+    className?: string
 }
 
-export function ExportButton({ data, fetchData, filename = 'export.csv', label = 'Export CSV' }: ExportButtonProps) {
+export function ExportButton({ data, fetchData, filename = 'export.csv', label = 'Export CSV', className }: ExportButtonProps) {
     const [isLoading, setIsLoading] = useState(false)
 
     const handleExport = async () => {
@@ -66,7 +69,7 @@ export function ExportButton({ data, fetchData, filename = 'export.csv', label =
             variant="outline"
             size="sm"
             onClick={handleExport}
-            className="flex gap-2"
+            className={cn("flex gap-2", className)}
             disabled={isLoading}
         >
             {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

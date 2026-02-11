@@ -112,9 +112,9 @@ export function AttendanceClient({ employees, attendance: initialData, date }: A
     return (
         <div>
             <Card className="mb-6">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
                     <CardTitle className="text-xl font-bold">Attendance Management</CardTitle>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <ExportButton
                             data={initialData.map((r: AttendanceRecord) => {
                                 const emp = employees.find(e => e.id === r.employee_id)
@@ -127,11 +127,13 @@ export function AttendanceClient({ employees, attendance: initialData, date }: A
                             })}
                             filename={`attendance_${date}.csv`}
                             label="Export today's data"
+                            className="w-full sm:w-auto"
                         />
                         <ExportButton
                             fetchData={fetchAllAttendance}
                             filename={`attendance_history_${format(new Date(), 'yyyy-MM-dd')}.csv`}
                             label="Export All Attendance Data"
+                            className="w-full sm:w-auto"
                         />
                     </div>
                 </CardHeader>
